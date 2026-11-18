@@ -1,9 +1,9 @@
 # Cases / Случаи
 
-Real fraud caught by this machine in the ALM project (November 2026).
+Real fraud caught by this machine in a real research project (November 2026).
 Every category in `honesty_patterns.json` traces to at least one case here.
 
-Реальный подлог, пойманный этой машиной в проекте ALM (ноябрь 2026).
+Реальный подлог, пойманный этой машиной в реальном исследовательском проекте (ноябрь 2026).
 Каждая категория в `honesty_patterns.json` выросла минимум из одного случая ниже.
 
 ---

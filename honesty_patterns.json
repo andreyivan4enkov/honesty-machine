@@ -1,6 +1,6 @@
 {
   "_about": "Honesty Machine rule set. Each category = one kind of fraud actually caught in the wild. severity 'block' fails CI/pre-commit; 'warn' is reported for human judgment. Replace categories with YOUR project invariants — regex over code with comments stripped. For C-family files string literals are also scanned (GPU kernels hide in strings).",
-  "_adaptation": "5 minutes: (1) delete ALM-specific categories, (2) write your own invariants as regex lists, (3) drop AGENTS.md into your repo root, (4) run bash install_precommit.sh.",
+  "_adaptation": "5 minutes: (1) delete the example categories, (2) write your own invariants as regex lists, (3) drop AGENTS.md into your repo root, (4) run bash install_precommit.sh.",
   "skip_dirs": [".git", ".venv", "venv", "node_modules", "__pycache__", "site-packages", "dist-info"],
   "skip_dir_suffixes": ["_env", ".egg-info"],
   "file_extensions": [".py", ".c", ".cc", ".cpp", ".mm", ".m", ".glsl", ".comp", ".metal", ".swift"],

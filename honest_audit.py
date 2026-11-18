@@ -21,7 +21,7 @@ categories with YOUR project invariants (regex lists), done. No code changes.
 import re, sys, os, json
 
 # ---------------------------------------------------------------------------
-# Built-in default rule set (proven in the ALM project, 2026-11).
+# Built-in default rule set (proven in a real research project, 2026-11).
 # Overridden entirely by honesty_patterns.json if present.
 # ---------------------------------------------------------------------------
 DEFAULT_CONFIG = {
