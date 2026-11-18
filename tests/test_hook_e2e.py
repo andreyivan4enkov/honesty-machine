@@ -25,8 +25,12 @@ class HookRepo:
         with open(os.path.join(self.dir, name), "w", encoding="utf-8") as f:
             f.write(content)
 
-    def commit(self, msg="x"):
-        return sh("git add -A && git commit -m commitmsg", self.dir, check=False)
+    def commit(self, msg="x", add=True):
+        # add=True: git add -A перед коммитом; add=False: коммитим как есть
+        # (T2-тесты разделяют staged/worktree и не должны перетирать индекс)
+        if add:
+            sh("git add -A", self.dir)
+        return sh(f"git commit -m {msg}", self.dir, check=False)
 
     def cleanup(self):
         shutil.rmtree(self.dir, ignore_errors=True)
@@ -43,14 +47,14 @@ class TestHookE2E(unittest.TestCase):
         self.r.write("evil.py", "import torch\n")
         sh("git add evil.py", self.r.dir)
         self.r.write("evil.py", "# clean now\n")          # worktree чист, staged — подлог
-        res = self.r.commit()
+        res = self.r.commit(add=False)
         self.assertNotEqual(res.returncode, 0, "staged-подлог обязан блокироваться")
 
     def test_t2_clean_staged_passes_even_if_worktree_dirty(self):
         self.r.write("ok.py", "x = 1\n")
         sh("git add ok.py", self.r.dir)
         self.r.write("ok.py", "import torch\n")           # подлог только в worktree
-        res = self.r.commit()
+        res = self.r.commit(add=False)
         self.assertEqual(res.returncode, 0, f"чистый staged обязан проходить:\n{res.stdout}{res.stderr}")
 
     def test_t7_missing_auditor_blocks(self):

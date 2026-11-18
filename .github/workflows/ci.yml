@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  honesty-gate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # (a) full test suite (tokenize differs across versions — f-strings!)
+      - name: unit + e2e tests
+        run: python -m unittest discover -s tests
+
+      # (b) dogfooding: audit the whole tree with the repo's own rules.
+      #     examples/ is in skip_dirs of the repo config, so the gate stays green.
+      - name: self-audit (whole tree)
+        run: python honest_audit.py .
+
+      # (c) examples must reproduce the recorded expected output exactly
+      - name: examples reproduce expected output
+        run: |
+          python honest_audit.py examples/ > /tmp/examples_out.txt 2>&1 || true
+          sed -i 's|'$(pwd)'/||g' /tmp/examples_out.txt
+          diff examples/expected_output.txt /tmp/examples_out.txt

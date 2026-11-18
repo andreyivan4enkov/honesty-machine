@@ -51,8 +51,15 @@ class TestStripTokenizer(unittest.TestCase):
         self.assertIn("BACKPROP / gradient", h)
 
     def test_unparseable_py_warns_not_clean(self):
+        # битый файл + видимый подлог: сырой скан находит torch -> block (правильно)
         h = ha.audit_text("def broken(:\n    import torch\n", ".py")
-        self.assertIn("BACKPROP / gradient", h)  # сырой текст сканируется
+        self.assertIn("BACKPROP / gradient", h)
+        self.assertTrue(any("UNPARSEABLE" in c for c in h))
+        self.assertEqual(ha.severity(h)[0], "block")
+
+    def test_unparseable_py_alone_is_warn_never_clean(self):
+        # битый файл без запрещённого: WARN (UNPARSEABLE), никогда не CLEAN
+        h = ha.audit_text("def broken(:\n    x = 1\n", ".py")
         self.assertTrue(any("UNPARSEABLE" in c for c in h))
         self.assertEqual(ha.severity(h)[0], "warn")
 

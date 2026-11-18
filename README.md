@@ -49,7 +49,7 @@ Two severity levels, on purpose:
 
 ```bash
 # 1. copy the package into your repo
-cp -r honesty_machine/* your_repo/
+cp -r honesty-machine/* your_repo/
 
 # 2. edit the rules — replace the example categories with YOUR invariants
 $EDITOR honesty_patterns.json
@@ -57,6 +57,11 @@ $EDITOR honesty_patterns.json
 # 3. install the gate
 cd your_repo && bash install_precommit.sh
 ```
+
+Windows: the hook is a bash script (Git for Windows ships bash); the installer
+falls back from `python3` to `python`. Local hooks can always be bypassed with
+`git commit --no-verify` — that is why the real gate is CI
+(`.github/workflows/ci.yml`), which reruns everything server-side.
 
 An invariant for a web project, for example:
 
@@ -97,6 +102,10 @@ FRAUD PRESENT (block-severity categories) — blocking.
   about the code.
 - The generated pre-commit hook **excludes `examples/`** (it holds intentional fraud
   for testing the gate). Do not put real project code under `examples/`.
+- C++ raw strings `R"(...)"` are not specially parsed. On Python 3.8–3.11,
+  expressions inside f-strings are not scanned (fixed in 3.12+ via FSTRING_* tokens).
+- The gate itself was audited (2026-11-18) and several bypasses were found and
+  fixed — see `docs/FIX_VERDICTS.md`. Audit your gate, too.
 
 ## What's inside docs/
 

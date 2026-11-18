@@ -66,3 +66,25 @@ inside a backprop harness is not evidence for a backprop-free mechanism.
 `softmax` written as `exp(x)/Σexp(x)` under a neutral name contains no flagged
 word and passes the gate. This is documented, not hidden: the gate catches words,
 the rerun process catches meaning. Both layers are required.
+
+## Case 6 — Auditing the gate itself / Аудит самих ворот (2026-11-18)
+
+A second model audited the published gate and found live bypasses; each was
+reproduced before fixing (two of the claimed PoCs did **not** reproduce — recorded
+honestly in `docs/FIX_VERDICTS.md`):
+
+- **PoC2 (confirmed):** the closing line of a triple-quoted string was dropped
+  whole — `x = """\n...\n"""; import torch` scanned CLEAN. Fixed by tokenize-based
+  stripping (`examples/fraud_docstring_hide.py`).
+- **PoC3 (confirmed):** fake `/*` `*/` markers inside Python strings erased
+  everything between them (`re.S`). Fixed (`examples/fraud_fake_block_comment.py`).
+- **PoC4 (confirmed):** the Python `#`-comment rule was applied to C files, so a
+  C string containing `#` was truncated mid-literal. Fixed by a C state lexer.
+- **Staged-vs-worktree (confirmed):** the hook audited working-tree files, so
+  staged fraud with a clean worktree committed freely. The hook now audits
+  `git show :file` copies.
+- **Self-exclusion by prefix (confirmed):** `honest_audit_helpers.py` was skipped
+  because the name starts with `honest_audit`. Exact-name exclusion only.
+
+**Rule born:** the gate is code too — it gets audited, and its fixes get
+red→green tests like any fraud fix.
