@@ -1,0 +1,64 @@
+{
+  "_about": "Honesty Machine rule set. Each category = one kind of fraud actually caught in the wild. severity 'block' fails CI/pre-commit; 'warn' is reported for human judgment. Replace categories with YOUR project invariants — regex over code with comments stripped. For C-family files string literals are also scanned (GPU kernels hide in strings).",
+  "_adaptation": "5 minutes: (1) delete ALM-specific categories, (2) write your own invariants as regex lists, (3) drop AGENTS.md into your repo root, (4) run bash install_precommit.sh.",
+  "skip_dirs": [".git", ".venv", "venv", "node_modules", "__pycache__", "site-packages", "dist-info"],
+  "skip_dir_suffixes": ["_env", ".egg-info"],
+  "file_extensions": [".py", ".c", ".cc", ".cpp", ".mm", ".m", ".glsl", ".comp", ".metal", ".swift"],
+  "categories": {
+    "BACKPROP / gradient": {
+      "severity": "block",
+      "why": "hidden gradient training inside code that claims to be gradient-free",
+      "patterns": ["\\bimport\\s+torch\\b", "\\btorch\\.", "\\bautograd\\b", "\\.backward\\s*\\(", "\\bloss\\s*\\.backward\\b", "\\boptim\\s*\\.", "\\bAdam\\b", "\\bSGD\\b", "\\bzero_grad\\b", "\\.grad\\b", "_grad\\b", "\\bgrad_\\w+", "\\bgradient\\w*\\b", "\\bбэкпроп\\w*\\b", "\\blearning_rate\\b", "\\bmomentum\\b"]
+    },
+    "SOFTMAX": {
+      "severity": "block",
+      "why": "softmax where the design forbids it (allowed only as an explicitly labeled baseline)",
+      "patterns": ["\\bsoftmax\\b"]
+    },
+    "BATCH-NORM / normalization": {
+      "severity": "block",
+      "why": "batch-norm / layer-norm / dropout normalize over the current batch",
+      "patterns": ["\\bbatch_?norm\\b", "\\blayer_?norm\\b", "\\bdropout\\b"]
+    },
+    "GLOBAL SELECTION (argmax/topk)": {
+      "severity": "warn",
+      "why": "global argmax/top-k as the selector; the design requires local-dynamics selection. Legitimate in measurement harnesses — context is judged by a human.",
+      "patterns": ["\\bargmax\\b", "\\btopk\\b", "\\btop_k\\b"]
+    },
+    "RANDOMNESS IN FORWARD": {
+      "severity": "warn",
+      "why": "forward pass must be deterministic; seeds belong to the test harness only",
+      "patterns": ["\\brandn\\b", "\\bmanual_seed\\b", "\\bnp\\.random\\b", "\\bdefault_rng\\b", "\\brandom\\.\\w+\\b"]
+    },
+    "MEAN / averaging": {
+      "severity": "warn",
+      "why": "averaging destroys source identity (project principle: summation, not averaging)",
+      "patterns": ["\\bnp\\.mean\\b", "\\.mean\\s*\\(\\s*\\)", "\\baverage\\b"]
+    },
+    "SIGMOID": {
+      "severity": "warn",
+      "why": "sigmoid",
+      "patterns": ["\\bsigmoid\\b"]
+    },
+    "normalize (vector — check context)": {
+      "severity": "warn",
+      "why": "vector normalization is legal on the unit sphere; batch normalization is not — context decides",
+      "patterns": ["\\bnormaliz\\w*\\b"]
+    },
+    "tanh (rejected formula)": {
+      "severity": "warn",
+      "why": "tanh is rejected in this project — EXCEPT legal cases (Poincare geometry); context is judged by a human",
+      "patterns": ["\\btanh\\b"]
+    },
+    "MAGIC CONSTANTS (candidates)": {
+      "severity": "warn",
+      "why": "thresholds and ratios must be derived from state (order statistics, escape from data), not invented",
+      "patterns": ["\\b0\\.[13579]\\d*\\b", "\\b[1-9]\\.[13579]\\d*\\b"]
+    }
+  },
+  "_example_custom_category": {
+    "severity": "block",
+    "why": "EXAMPLE for your own project: no network calls inside tests",
+    "patterns": ["\\brequests\\.(get|post)\\b", "\\burllib\\.request\\b", "\\bhttpx\\b"]
+  }
+}

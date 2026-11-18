@@ -1,0 +1,5 @@
+# Watcher state and logs are local runtime artifacts
+honest_audit_state.json
+honest_audit.log
+__pycache__/
+.DS_Store

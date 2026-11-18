@@ -1,0 +1,10 @@
+rules: honesty_patterns.json
+VERDICT                                       FINDINGS
+------------------------------------------------------------------------------------------
+FRAUD: BACKPROP / gradient                    examples/fraud_hidden_in_c_string.c
+                                                BACKPROP / gradientx3
+FRAUD: SOFTMAX                                examples/fraud_softmax.py
+                                                SOFTMAXx3
+------------------------------------------------------------------------------------------
+clean files: 1, files with findings: 2
+FRAUD PRESENT (block-severity categories) — blocking.
